@@ -263,20 +263,24 @@ def estimate_belts(d: dict):
         elif v <= Fraction(15, 2):
             b = ": 半条黄带"
         elif v <= 15:
-            b = ": 半条红带 或 1红带"
+            b = ": 半条红带 或 1黄带"
         elif v <= Fraction(45, 2):
             b = ": 半条蓝带 或 1红带"
+        elif v <= 30:
+            b = ": 1红带"
         else:
             b = ": " + str((v / 45).__ceil__()) + "蓝带"
         s = "{0:>7} {1:<5}{2}".format(fraction_format(v), locale_dict[k], b)
         print(s)
 
 
+X_ORDER = ["advanced-oil-processing", "heavy-oil-cracking", "light-oil-cracking"]
+Y_ORDER = ["petroleum-gas", "light-oil", "heavy-oil"]
+
+
 def oil_solve(item: dict, scheme=None, beautify_output=True):
     if scheme is None:
         scheme = normal
-    X_ORDER = ["advanced-oil-processing", "heavy-oil-cracking", "light-oil-cracking"]
-    Y_ORDER = ["petroleum-gas", "light-oil", "heavy-oil"]
     oil_recipe = []
     x = []
     for t in X_ORDER:
@@ -288,7 +292,10 @@ def oil_solve(item: dict, scheme=None, beautify_output=True):
         for i in input_:
             result[i[0]] = result.get(i[0], 0) + i[1] / time
         for i in output:
-            result[i[0]] = result.get(i[0], 0) - i[1] / time * prod
+            result[i[0]] = result.get(i[0], 0) - i[1] / time
+        for k, v in result.items():
+            if v < 0:
+                result[k] = v * prod
         for k in Y_ORDER:
             x.append(result.get(k, 0))
         oil_recipe.append(result)
@@ -331,16 +338,18 @@ def oil_solve(item: dict, scheme=None, beautify_output=True):
             for k, v in t.items():
                 v = v * x[i]
                 item[k] = item.get(k, 0) + v
+                result_dict[k] = result_dict.get(k, 0) + v
                 if v < 0:
                     output += fraction_format(-v) + " " + locale_dict[k] + ", "
                 else:
                     input_ += fraction_format(v) + " " + locale_dict[k] + ", "
             record(x[i], locale_dict[X_ORDER[i]], output, input_)
     for k in Y_ORDER:
-        del item[k]
+        assert item.pop(k, 0) == 0
+        assert result_dict.pop(k, 0) == 0
     if beautify_output:
         print("输入:")
-        estimate_belts({k: v for k, v in item.items() if k in FLUIDS})
+        estimate_belts({k: v for k, v in item.items()})
         print("输出:")
         estimate_belts(output_)
         print(SEPARATOR)
@@ -395,7 +404,8 @@ def quantitative_factory():
         elif block[0] == "炼油区":
             print(block[0].upper())
             print()
-            oil_solve(result_dict, block[1], beautify_output=True)
+            output = {k: result_dict[k] for k in Y_ORDER}
+            oil_solve(output, block[1], beautify_output=True)
         elif block[0] == "科技区":
             print(block[0].upper())
             print()
@@ -499,7 +509,6 @@ if __name__ == "__main__":
         "steel-plate",
         "stone",
         "stone-brick",
-        "coal",
     }
     chemistry_items = {"sulfuric-acid", "sulfur", "plastic-bar", "lubricant"}
     bus_items = {
@@ -560,6 +569,7 @@ if __name__ == "__main__":
         ["炼油区", normal],
         ["result", "原始物品"],
     ]
+    # spm(60)
     code.interact(
         banner="""
     这是一个简单的键入-计算-显示-循环
