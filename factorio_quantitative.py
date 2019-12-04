@@ -196,6 +196,15 @@ def get_complexity_dict():
 
 
 def preprocessing_schemes(config):
+    if "FACTORIO_PATH" not in config:
+        import winreg
+
+        key = winreg.OpenKey(winreg.HKEY_CLASSES_ROOT, r"steam\Shell\Open\Command")
+        game = winreg.QueryValue(key, "")
+        game = game.translate({ord("\\"): "/"})
+        game = game[1 : game.index('Steam.exe"')] + r"steamapps/common/Factorio/"
+        config["FACTORIO_PATH"] = game
+        open(CONFIG_PATH, "a", encoding="utf-8").write("\nFACTORIO_PATH: " + game)
     for s in config["SCHEMES"]:
         for k, v in config[s].items():
             f1, f2 = v
@@ -457,7 +466,8 @@ def show(d=None):
 
 
 if __name__ == "__main__":
-    config = yaml.full_load(open("config.yaml", encoding="utf-8"))
+    CONFIG_PATH = "config.yaml"
+    config = yaml.full_load(open(CONFIG_PATH, encoding="utf-8"))
     preprocessing_schemes(config)
     globals().update(config)
     recipe_dict = get_recipe()
