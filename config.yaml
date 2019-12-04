@@ -1,0 +1,157 @@
+FACTORIO_PATH: D:/Program Files (x86)/Steam/steamapps/common/Factorio/
+LOCALE: zh-CN
+LOCALE_DICT:
+  zh-CN:
+    script_help: |
+      这是一个简单的键入-计算-显示-循环
+
+      试试下面的命令
+
+      spm(60)
+      show()
+      clear()
+      reduce({'utility-science-pack':2}, bus_items, modularize)
+      oil_solve({'petroleum-gas':130, 'light-oil':90, 'heavy-oil':10}, normal)
+      translater.get_term_list()
+
+      键入 exit() 来退出
+    "half belt": 半条黄带
+    "half fast belt or 1 belt": "半条红带 或 1黄带"
+    "half express belt or 1 fast belt": "半条蓝带 或 1红带"
+    "1 fast belt": "1红带"
+    "express belt": "蓝带"
+    7sp: 七色瓶研究
+    crafting: 组装
+    chemistry: 化工
+    smelting: 熔练
+    oil-processing: 炼油
+    centrifuging: 离心机
+    rocket-building: 发射井
+    lab: 研究中心
+    other: 其他
+    "Input:": "输入："
+    "Output:": "输出："
+  en:
+    script_help: |
+      This is a Read-Eval-Print-Loop
+
+      Try the commands below
+
+      spm(60)
+      show()
+      clear()
+      reduce({'utility-science-pack':2}, bus_items, modularize)
+      oil_solve({'petroleum-gas':130, 'light-oil':90, 'heavy-oil':10}, normal)
+
+      type exit() to quit
+
+SEPARATOR: --------------------------------------------------------
+FLUIDS:
+  !!set {
+    water,
+    petroleum-gas,
+    crude-oil,
+    steam,
+    light-oil,
+    heavy-oil,
+    lubricant,
+    sulfuric-acid,
+  }
+OIL_RECIPES: [advanced-oil-processing, heavy-oil-cracking, light-oil-cracking]
+OIL_KINDS: [petroleum-gas, light-oil, heavy-oil]
+SCHEMES: [normal, modularize]
+normal: &normal
+  crafting: ["1.25", 1]
+  chemistry: [1, 1]
+  smelting: [2, 1]
+  oil-processing: [1, 1]
+  centrifuging: [1, 1]
+  rocket-building: [1, 1]
+  lab: [1, 1]
+  other: [1, 1]
+
+modularize: &modularize
+  crafting: ["5.5", "1.4"]
+  chemistry: ["4.55", "1.3"]
+  smelting: ["9.4", "1.2"]
+  oil-processing: ["5.55", "1.3"]
+  centrifuging: [1, 1]
+  rocket-building: ["2", "1.4"]
+  lab: ["10", "1.2"]
+  other: [1, 1]
+
+raw_items:
+  !!set &raw_items {
+    coal,
+    copper-ore,
+    heavy-oil,
+    iron-ore,
+    light-oil,
+    petroleum-gas,
+    stone,
+    water,
+  }
+smelted_items:
+  !!set &smelted_items {
+    copper-plate,
+    iron-plate,
+    steel-plate,
+    stone,
+    stone-brick,
+  }
+chemistry_items:
+  !!set &chemistry_items { lubricant, plastic-bar, sulfur, sulfuric-acid }
+basic: !!set &basic { <<: [*smelted_items, *chemistry_items] }
+bus_items:
+  !!set &bus_items {
+    advanced-circuit,
+    coal,
+    copper-plate,
+    electronic-circuit,
+    iron-plate,
+    light-oil,
+    lubricant,
+    petroleum-gas,
+    plastic-bar,
+    processing-unit,
+    steel-plate,
+    stone,
+    stone-brick,
+    sulfur,
+    sulfuric-acid,
+    water,
+  }
+science_packs:
+  !!set &science_packs {
+    automation-science-pack,
+    chemical-science-pack,
+    logistic-science-pack,
+    military-science-pack,
+    production-science-pack,
+    space-science-pack,
+    utility-science-pack,
+  }
+factory:
+  - [科技区, science, *normal]
+  - [自动化科技包, { automation-science-pack }, *bus_items, *normal, red]
+  - [物流科技包, { logistic-science-pack }, *bus_items, *normal, green]
+  - [化工科技包, { chemical-science-pack }, *bus_items, *normal, blue]
+  - [生产科技包, { production-science-pack }, *bus_items, *normal, pink]
+  - [军工科技包, { military-science-pack }, *bus_items, *normal, gray]
+  - [效能科技包, { utility-science-pack }, *bus_items, *normal, yellow]
+  - [太空科技包, { space-science-pack }, *bus_items, *normal, white]
+  - [总线, show]
+  - [蓝板（CPU)区, { processing-unit }, *basic, *normal, blue]
+  - [红板区, { advanced-circuit }, *basic, *normal, red]
+  - [绿板区, { electronic-circuit }, *basic, *normal, green]
+  - [熔炼后物品或化工物品, show]
+  - [冶炼区, *smelted_items, *raw_items, *normal, white]
+  - [
+      化工区,
+      *chemistry_items,
+      !!set { <<: *raw_items, iron-plate },
+      *normal,
+      white,
+    ]
+  - [炼油区, solve_oil, *normal]
+  - [原始物品, show]
